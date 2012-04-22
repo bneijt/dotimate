@@ -15,3 +15,7 @@ Example
 
     dotimate a.dot a.dot b.dot c.dot
     ffmpeg -r 15 -i frames/frame%05d.png movie.webm
+    
+About
+-----
+dotimate was created with the help of various Haskell hackers during the [UHac 2012](http://www.haskell.org/haskellwiki/DHD_UHac#Utrecht_Hackathon).
