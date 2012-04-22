@@ -5,50 +5,27 @@ Name:                dotimate
 -- standards guiding when and how versions should be incremented.
 Version:             0.1
 
--- A short (one-line) description of the package.
--- Synopsis:            
+Synopsis:            Generate movie frames between multiple .dot graphs.
 
 -- A longer description of the package.
--- Description:         
-
--- The license under which the package is released.
+Description:         Given a set of .dot files, dotimate will use neato
+                     to generate a set of frames between adding and
+                     removing nodes from one .dot graph to the next.
+Homepage:            https://github.com/bneijt/dotimate
 License:             GPL-3
-
--- The file containing the license text.
 License-file:        LICENSE
-
--- The package author(s).
 Author:              Bram Neijt
-
--- An email address to which users can send suggestions, bug reports,
--- and patches.
 Maintainer:          bneijt@gmail.com
-
--- A copyright notice.
--- Copyright:           
-
-Category:            Development
+Category:            Animation
 
 Build-type:          Simple
-
--- Extra files to be distributed with the package, such as examples or
--- a README.
--- Extra-source-files:  
-
--- Constraint on the version of Cabal needed to build this package.
+Extra-source-files:  README.md
 Cabal-version:       >=1.2
 
 
 Executable dotimate
-  -- .hs or .lhs file containing the Main module.
-  Main-is:             src/main/Main.hs
-  
-  -- Packages needed in order to build this package.
-  Build-depends:  base, process, regex-compat, regex-posix, graphviz >=2999.13.0.2, text, directory
-  
-  -- Modules not exported by this package.
-  -- Other-modules:       
-  
-  -- Extra tools (e.g. alex, hsc2hs, ...) needed to build the source.
-  -- Build-tools:         
+    Main-is:             src/main/Main.hs
+
+    -- Packages needed in order to build this package.
+    Build-depends:  base, process, regex-compat, regex-posix, graphviz >=2999.13.0.2, text, directory
   
