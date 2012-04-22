@@ -31,8 +31,8 @@ generate 10 frames from (earlier result) to d.dot
 
 emitFrameFromDotFile :: String -> Int -> IO ()
 emitFrameFromDotFile dotFileName frameNumber = do
-    _ <- readProcess "neato" ["-Gmaxiter=5", "-Tdot", "-oframe.dot", dotFileName] "" -- TODO exec
-    _ <- readProcess "neato" ["-Gmaxiter=1", "-Tpng", printf "-oframes/frame%05d.png" frameNumber, "frame.dot"] ""
+    _ <- readProcess "neato" ["-Gmaxiter=2", "-Tdot", "-Gbgcolor=transparent", "-Gcenter=1", "-Gpage=7,7", "-oframe.dot", dotFileName] "" -- TODO exec
+    _ <- readProcess "neato" ["-Gmaxiter=1", "-Tpng", "-Gbgcolor=transparent", "-Gcenter=1", "-Gpage=7,7", printf "-oframes/frame%05d.png" frameNumber, "frame.dot"] ""
     System.Directory.renameFile "frame.dot" dotFileName
 
 emitFramesFromDotFile :: String -> Int -> IO()
@@ -52,16 +52,22 @@ edgesOf graph = edgeStmts gs where gs = graphStatements graph
 equalEndpoints :: DotEdge String -> DotEdge String -> Bool
 equalEndpoints edgeA edgeB = (fromNode edgeA == fromNode edgeB) && (toNode edgeA == toNode edgeB)
 
-creatUnionGraph graphA graphB = do
-    let nodesA = nodesOf graphA
-    let nodesB = nodesOf graphB
-    let allNodes = union nodesA nodesB
-    let edgesA = edgesOf graphA
-    let edgesB = edgesOf graphB
-    let allEdges = unionBy equalEndpoints edgesA edgesB
-    graphA { graphStatements = (graphStatements graphA){nodeStmts = allNodes, edgeStmts = allEdges} }
+equalNode nodeA nodeB = nodeID nodeA == nodeID nodeB
 
-removeNodesAndEdgesNotIn smallGraph possiblyToLargeGraph = possiblyToLargeGraph
+creatUnionGraph fromGraph toGraph = do
+    let nodesA = nodesOf fromGraph
+    let nodesB = nodesOf toGraph
+    let allNodes = unionBy equalNode nodesA nodesB
+    let edgesA = edgesOf fromGraph
+    let edgesB = edgesOf toGraph
+    let allEdges = unionBy equalEndpoints edgesA edgesB
+    fromGraph { graphStatements = (graphStatements fromGraph){nodeStmts = allNodes, edgeStmts = allEdges} }
+
+-- Remove the elements of the possiblyToLargeGraph which are not in nextGraph
+pruneCurrenGraph nextGraph possiblyToLargeGraph = do
+    let remainingNodes = intersectBy equalNode (nodesOf possiblyToLargeGraph) (nodesOf nextGraph)
+    let remainingEdges = intersectBy equalEndpoints (edgesOf possiblyToLargeGraph) (edgesOf possiblyToLargeGraph)
+    possiblyToLargeGraph { graphStatements = (graphStatements possiblyToLargeGraph){nodeStmts = remainingNodes, edgeStmts = remainingEdges} }
 
 emitFramesBetween :: (DotGraph String, Int) -> (DotGraph String, Int) -> IO (DotGraph String, Int)
 emitFramesBetween (currentGraph, aFrameNumber) (nextGraph, bFrameNumber) = do
@@ -70,7 +76,7 @@ emitFramesBetween (currentGraph, aFrameNumber) (nextGraph, bFrameNumber) = do
     let unionGraph = creatUnionGraph afterEmit nextGraph
     afterUnionEmit <- emitGraph unionGraph (aFrameNumber + 10)
     --Remove nodes and egdges from the union
-    let prunedGraph = removeNodesAndEdgesNotIn nextGraph afterUnionEmit
+    let prunedGraph = pruneCurrenGraph nextGraph afterUnionEmit
     lastGraph <- emitGraph prunedGraph (aFrameNumber + 20)
     return (lastGraph, bFrameNumber)
     

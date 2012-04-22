@@ -3,5 +3,5 @@ digraph code {
     a -> b;
     b -> c;
     c -> d;
-    c -> e;	
+    d -> e;	
 }

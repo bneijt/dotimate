@@ -10,3 +10,7 @@ Working towards
 
 which will create a `frames` directory containing all the frames
 
+Example
+-------
+
+    dotimate a.dot a.dot b.dot c.dot
