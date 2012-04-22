@@ -24,8 +24,8 @@ Cabal-version:       >=1.2
 
 
 Executable dotimate
-    Main-is:             src/main/Main.hs
-
+    Main-is:            src/main/Main.hs
+    GHC-Options:        -Wall
     -- Packages needed in order to build this package.
     Build-depends:  base, process, regex-compat, regex-posix, graphviz >=2999.13.0.2, text, directory
   
