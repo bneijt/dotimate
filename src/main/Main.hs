@@ -28,11 +28,11 @@ generate 10 frames from (earlier result) to d.dot
 
 -}
 
-emitFrameFromDotFile :: String -> Int -> IO String
+emitFrameFromDotFile :: String -> Int -> IO ()
 emitFrameFromDotFile dotFileName frameNumber = do
     _ <- readProcess "neato" ["-Gmaxiter=5", "-Tdot", "-oframe.dot", dotFileName] "" -- TODO exec
     _ <- readProcess "neato" ["-Gmaxiter=1", "-Tpng", printf "-oframes/frame%05d.png" frameNumber, "frame.dot"] ""
-    readProcess "mv" ["frame.dot", dotFileName] "" -- TODO Use System.Directory.renameFile or somethign like that
+    System.Directory.renameFile "frame.dot" dotFileName
 
 emitFramesFromDotFile :: String -> Int -> IO()
 emitFramesFromDotFile dotFileName startFrame = do
@@ -46,13 +46,19 @@ emitGraph graph frameNumber = do
     return (nextGraph, (frameNumber + 1))
 
 -- emitFramesBetween :: (DotGraph String, Int) -> (DotGraph String, Int) -> (DotGraph String, Int)
-emitFramesBetween (graphA, aFrameNumber) (graphB, bFrameNumber) = emitGraph graphB bFrameNumber
-
+emitFramesBetween (currentGraph, aFrameNumber) (nextGraph, bFrameNumber) = do
+    emitGraph currentGraph bFrameNumber
+    --Add nodes and edges to the graph
+    let unionGraph = currentGraph
+    emitGraph unionGraph (bFrameNumber + 10)
+    --Remove nodes and egdges from the union
+    let endGraph = nextGraph
+    emitGraph endGraph (bFrameNumber + 20)
 
 main = do
     createDirectoryIfMissing False "frames"
     args <- getArgs
     graphs <- mapM readDotFile args
-    let numberedGraphs = Prelude.zip graphs [0,10..]
+    let numberedGraphs = Prelude.zip graphs [0,30..]
     foldM_ emitFramesBetween (Prelude.head numberedGraphs) (Prelude.tail numberedGraphs)
     putStrLn "done"
