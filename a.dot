@@ -1,6 +1,6 @@
 digraph code {
-    c -> d;
+    a;b;c;d;
     a -> b;
     b -> c;
-    b -> d;
+    c -> d;
 }
