@@ -9,11 +9,16 @@ import System.Directory
 import Control.Monad
 import Data.List
 
+baseCmd :: String
+baseCmd = "neato"
+
+defaultArguments :: [String]
+defaultArguments = ["-Elen=2.0", "-Nfontsize=10", "-Nshape=plaintext", "-Nheight=.1", "-Nwidth=.1", "-Ecolor=gray",  "-Gcenter=1", "-Gsize=12,12!"]
 
 emitFrameFromDotFile :: String -> Int -> IO ()
 emitFrameFromDotFile dotFileName frameNumber = do
-    _ <- readProcess "neato" ["-Gmaxiter=2", "-Tdot", "-Gpage=7,7", "-Gbgcolor=lightsteelblue3", "-Gcenter=1", "-oframe.dot", dotFileName] "" -- TODO exec
-    _ <- readProcess "neato" ["-Gmaxiter=1", "-Tpng", "-Gpage=7,7", "-Gbgcolor=lightsteelblue3", "-Gcenter=1", printf "-oframes/frame%05d.png" frameNumber, "frame.dot"] ""
+    _ <- readProcess baseCmd (defaultArguments ++ ["-Gmaxiter=10", "-Tdot", "-oframe.dot", dotFileName]) "" -- TODO exec
+    _ <- readProcess baseCmd (defaultArguments ++ ["-Gmaxiter=1", "-Tjpg", printf "-oframes/frame%05d.jpg" frameNumber, "frame.dot"]) ""
     System.Directory.renameFile "frame.dot" dotFileName
 
 emitFramesFromDotFile :: String -> Int -> IO()

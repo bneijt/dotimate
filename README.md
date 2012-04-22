@@ -14,7 +14,7 @@ Example
 -------
 
     dotimate a.dot a.dot b.dot c.dot
-    ffmpeg -r 15 -i frames/frame%05d.png movie.webm
+    ffmpeg -r 15 -i frames/frame%05d.jpg movie.webm
     
 About
 -----
