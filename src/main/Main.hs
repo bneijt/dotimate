@@ -32,28 +32,31 @@ emitFrameFromDotFile :: String -> Int -> IO ()
 emitFrameFromDotFile dotFileName frameNumber = do
     _ <- readProcess "neato" ["-Gmaxiter=5", "-Tdot", "-oframe.dot", dotFileName] "" -- TODO exec
     _ <- readProcess "neato" ["-Gmaxiter=1", "-Tpng", printf "-oframes/frame%05d.png" frameNumber, "frame.dot"] ""
+    putStrLn (printf "-oframes/frame%05d.png" frameNumber)
     System.Directory.renameFile "frame.dot" dotFileName
 
 emitFramesFromDotFile :: String -> Int -> IO()
 emitFramesFromDotFile dotFileName startFrame = do
-    mapM_ (emitFrameFromDotFile dotFileName) [startFrame..startFrame + 10]
+    mapM_ (emitFrameFromDotFile dotFileName) [startFrame..startFrame + 9]
 
-emitGraph :: DotGraph String -> Int -> IO (DotGraph String, Int)
+emitGraph :: DotGraph String -> Int -> IO (DotGraph String)
 emitGraph graph frameNumber = do
     writeDotFile "state.dot" graph
     emitFramesFromDotFile "state.dot" frameNumber
-    nextGraph <- readDotFile "state.dot" :: IO (DotGraph String)
-    return (nextGraph, (frameNumber + 1))
+    readDotFile "state.dot" :: IO (DotGraph String)
 
--- emitFramesBetween :: (DotGraph String, Int) -> (DotGraph String, Int) -> (DotGraph String, Int)
+
+emitFramesBetween :: (DotGraph String, Int) -> (DotGraph String, Int) -> IO (DotGraph String, Int)
 emitFramesBetween (currentGraph, aFrameNumber) (nextGraph, bFrameNumber) = do
-    emitGraph currentGraph bFrameNumber
+    afterEmit <- emitGraph currentGraph aFrameNumber
     --Add nodes and edges to the graph
-    let unionGraph = currentGraph
-    emitGraph unionGraph (bFrameNumber + 10)
+    let unionGraph = afterEmit
+    afterUnionEmit <- emitGraph unionGraph (aFrameNumber + 10)
     --Remove nodes and egdges from the union
-    let endGraph = nextGraph
-    emitGraph endGraph (bFrameNumber + 20)
+    let endGraph = afterUnionEmit
+    lastGraph <- emitGraph endGraph (aFrameNumber + 20)
+    return (lastGraph, bFrameNumber)
+    
 
 main = do
     createDirectoryIfMissing False "frames"
