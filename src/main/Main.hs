@@ -8,59 +8,51 @@ import Text.Printf
 -- import Data.GraphViz.Types.Canonical
 import Data.GraphViz.Types.Graph
 import System.Directory
+import Control.Monad
 -- Write PNG image file
 -- Neato to PNG first frame
 -- Add edge to end of nodes
 -- Neato the next step
 {-
-General flow:
-    Read dot graphs given
-    Calculate diff of nodes and edges
-    Create images of each update
+./dotimate a.dot b.dot c.dot d.dot
+
+generate 10 frames from (a.dot) to b.dot
+    simulate spring model for 5 iterations (on a.dot), print out image
+    add nodes of b.dot to a.dot
+    simulate spring model for 5 iterations (on state.dot), print out image
+    remove extra nodes and edges not in b.dot from state.dot
+    simulate spring model for 5 iterations (on state.dot), print out image    
+generate 10 frames from (earlier result) to c.dot
+generate 10 frames from (earlier result) to d.dot
+
+
 -}
 
 emitFrameFromDotFile :: String -> Int -> IO String
 emitFrameFromDotFile dotFileName frameNumber = do
-    _ <- readProcess "neato" ["-Gmaxiter=5", "-Tdot", "-oframe.dot", dotFileName] ""
+    _ <- readProcess "neato" ["-Gmaxiter=5", "-Tdot", "-oframe.dot", dotFileName] "" -- TODO exec
     _ <- readProcess "neato" ["-Gmaxiter=1", "-Tpng", printf "-oframes/frame%05d.png" frameNumber, "frame.dot"] ""
-    readProcess "mv" ["frame.dot", dotFileName] ""
+    readProcess "mv" ["frame.dot", dotFileName] "" -- TODO Use System.Directory.renameFile or somethign like that
 
 emitFramesFromDotFile :: String -> Int -> IO()
 emitFramesFromDotFile dotFileName startFrame = do
     mapM_ (emitFrameFromDotFile dotFileName) [startFrame..startFrame + 10]
 
-emitGraph dotGraph = do
-    writeDotFile "state.dot" dotGraph
-    emitFramesFromDotFile "state.dot" 1
-    readDotFile "state.dot" :: IO (DotGraph String)
+emitGraph :: DotGraph String -> Int -> IO (DotGraph String, Int)
+emitGraph graph frameNumber = do
+    writeDotFile "state.dot" graph
+    emitFramesFromDotFile "state.dot" frameNumber
+    nextGraph <- readDotFile "state.dot" :: IO (DotGraph String)
+    return (nextGraph, (frameNumber + 1))
 
-{-
-addNodes :: oldGraph -> newGraph -> combinedGraph
-prune :: oldGraph -> newGraph -> prunedGraph
+-- emitFramesBetween :: (DotGraph String, Int) -> (DotGraph String, Int) -> (DotGraph String, Int)
+emitFramesBetween (graphA, aFrameNumber) (graphB, bFrameNumber) = emitGraph graphB bFrameNumber
 
-do:
-    addNodes
-    saveGraph
-    emitFrames
-    loadGraph
-    prune
-    saveGraph
-    emitFrames
-    loadGraph
--}
-
-createFramesBetween startFileName endFileName = do
-    startGraph <- readDotFile startFileName :: IO (DotGraph String)
-    endGraph <- readDotFile endFileName :: IO (DotGraph String)
---    emitGraph 
---    writeDotFile "next.dot" (addEdge (args !! 0) (args !! 1) [] df)
-    emitFrameFromDotFile "next.dot" 10
-    
 
 main = do
     createDirectoryIfMissing False "frames"
-    startGraph <- readDotFile "some.dot" :: IO (DotGraph String)
-    graph <- emitGraph startGraph
+    args <- getArgs
+    graphs <- mapM readDotFile args
+    let numberedGraphs = Prelude.zip graphs [0,10..]
+    foldM_ emitFramesBetween (Prelude.head numberedGraphs) (Prelude.tail numberedGraphs)
     putStrLn "done"
---    foldl nextDotgraph "initial.dot" args
-
