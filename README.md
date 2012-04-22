@@ -1,10 +1,12 @@
-Animate DOT graphs together into a movie.
+Animate DOT graphs together into a movie
+========================================
 
 Nothing works yet
 =================
 
-
 Working towards
-dotimate [dotfiles]
-which will create an images directory containing all the frames
+
+    dotimate <dot file> <dot file> [[dot file] ..]
+
+which will create a `frames` directory containing all the frames
 
