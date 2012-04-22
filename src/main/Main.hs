@@ -31,8 +31,8 @@ generate 10 frames from (earlier result) to d.dot
 
 emitFrameFromDotFile :: String -> Int -> IO ()
 emitFrameFromDotFile dotFileName frameNumber = do
-    _ <- readProcess "neato" ["-Gmaxiter=2", "-Tdot", "-Gbgcolor=transparent", "-Gcenter=1", "-Gpage=7,7", "-oframe.dot", dotFileName] "" -- TODO exec
-    _ <- readProcess "neato" ["-Gmaxiter=1", "-Tpng", "-Gbgcolor=transparent", "-Gcenter=1", "-Gpage=7,7", printf "-oframes/frame%05d.png" frameNumber, "frame.dot"] ""
+    _ <- readProcess "neato" ["-Gmaxiter=2", "-Tdot", "-Gpage=7,7", "-Gbgcolor=lightsteelblue3", "-Gcenter=1", "-oframe.dot", dotFileName] "" -- TODO exec
+    _ <- readProcess "neato" ["-Gmaxiter=1", "-Tpng", "-Gpage=7,7", "-Gbgcolor=lightsteelblue3", "-Gcenter=1", printf "-oframes/frame%05d.png" frameNumber, "frame.dot"] ""
     System.Directory.renameFile "frame.dot" dotFileName
 
 emitFramesFromDotFile :: String -> Int -> IO()
