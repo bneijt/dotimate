@@ -13,7 +13,7 @@ baseCmd :: String
 baseCmd = "neato"
 
 defaultArguments :: [String]
-defaultArguments = ["-Elen=2.0", "-Nfontsize=10", "-Nshape=plaintext", "-Nheight=.1", "-Nwidth=.1", "-Ecolor=gray",  "-Gcenter=1", "-Gsize=12,12!"]
+defaultArguments = ["-Elen=2.0", "-Nfontsize=10", "-Nshape=plaintext", "-Nheight=.1", "-Nwidth=.1", "-Ecolor=#0000555f",  "-Gcenter=1", "-Gsize=12,12!"]
 
 emitFrameFromDotFile :: String -> Int -> IO ()
 emitFrameFromDotFile dotFileName frameNumber = do
